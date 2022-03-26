@@ -10,7 +10,7 @@ class PostsController extends Controller
     public function index()
     {
         return response([
-            'posts' =>Post::orderBy('created_at','desc')->with('title', 'user:id,name,image')->withCount('comments','likes')->get()
+            'posts' =>Post::orderBy('created_at','desc')->with('user:id,name,image')->withCount('comments','likes')->get()
         ],200);
     }
 
@@ -28,9 +28,12 @@ class PostsController extends Controller
             'body' => 'required|string'
         ]);
 
+        $image = $this->saveImage($request->image, 'posts');
+
         $post = Post::create([
             'body' => $attrs['body'],
-            'user_id'=>auth()->user()->id
+            'user_id'=>auth()->user()->id,
+            'image' => $image
         ]);
 
         return response([
