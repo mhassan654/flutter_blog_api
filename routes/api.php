@@ -24,8 +24,10 @@ Route::post('/login',[AuthController::class, 'login']);
 
 
 // protected route
-Route:group(['middleware'=>['auth::sactum']], function(){
+Route::group(['middleware'=>['auth:sanctum']], function(){
     //username
-    Route::post('/logout',[AuthController::class, 'logout']);
+    Route::get('/logout',[AuthController::class, 'logout']);
+
+    Route::get('/user',[AuthController::class, 'me']);
 
 });

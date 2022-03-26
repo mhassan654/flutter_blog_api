@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     public function register(Request $request){
         //validate fields
         $attrs = $request->validate([
-            'name' => 'rquired|string',
-            'email' => 'required|email|unique|users,email',
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed'
         ]);
 
@@ -24,7 +26,7 @@ class AuthController extends Controller
         // return user and token in response
         return response([
             'user' => $user,
-            'token'=> $user->createToken('secret')->plainTextToken;
+            'token' => $user->createToken('secret')->plainTextToken
         ]);
 
     }
@@ -46,11 +48,24 @@ class AuthController extends Controller
         // return user and token in response
         return response([
             'user' => auth()->user(),
-            'token'=> auth()->user()->createToken('secret')->plainText();
+            'token'=> auth()->user()->createToken('secret')->plainTextToken
         ],200);
 
     }
 
     // logout out user
-    
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        return response([
+            'message' =>'Logout successfully.'
+        ],200);
+    }
+
+    // get user defaultAliases
+    public function me()
+    {
+        return response(['user' => auth()->user()],200);
+
+    }
 }
