@@ -30,6 +30,14 @@ class PostsController extends Controller
 
     public function store(Request $request)
     {
+        // $validator = Validator::make(request()->all(), [
+        //     'invoiceId' => 'required|integer',
+        // ]);
+
+        // if ($validator->fails()) {
+        //     return $this->customFailResponseMessage($validator->messages(), 200);
+        // }
+
         $attrs = $request->validate([
             'body' => 'required|string'
         ]);
@@ -43,7 +51,7 @@ class PostsController extends Controller
         ]);
 
         return response([
-            'message' =>'post created.',
+            'message' =>'Post created successfully.',
             'post'=>$post
         ],200);
     }
@@ -58,7 +66,6 @@ class PostsController extends Controller
                'message' => 'post not found'
            ],403);
         }
-
         if ($post->user_id !== auth()->user()->id) {
             return response([
                 'message' => 'Permission Denied.'
@@ -95,10 +102,10 @@ class PostsController extends Controller
 
         $post->comments()->delete();
         $post->likes()->delete();
+        $post->delete();
 
         return response([
-            'message' =>'post deleted.',
-            'post'=>$post
+            'message' =>'post deleted.'
         ],200);
     }
 }

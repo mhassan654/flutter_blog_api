@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Like;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class LikesController extends Controller
@@ -12,7 +14,7 @@ class LikesController extends Controller
 
         if (!$post) {
             return response([
-                'message'=>'Post not founc.'
+                'message'=>'Post not found.'
             ],403);
         }
 
