@@ -47,7 +47,8 @@ class AuthController extends Controller
 
         // return user and token in response
         return response([
-            'user' => auth()->user(),
+            'message'=>"success",
+            'data' => auth()->user(),
             'token'=> auth()->user()->createToken('secret')->plainTextToken
         ],200);
 
