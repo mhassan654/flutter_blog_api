@@ -10,24 +10,32 @@ class AuthController extends Controller
 {
     public function register(Request $request){
         //validate fields
-        $attrs = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed'
-        ]);
+        // try {
+            $attrs = $request->validate([
+                'first_name' => 'required|string',
+                'last_name' => 'required|string',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|confirmed'
+            ]);
 
-        // create users
-        $user = User::create([
-            'name' => $attrs['name'],
-            'email' => $attrs['email'],
-            'password' => bcrypt($attrs['password'])
-        ]);
+            // create users
+            $user = User::create([
+                'first_name' => $attrs['first_name'],
+                'last_name' => $attrs['last_name'],
+                'email' => $attrs['email'],
+                'password' => bcrypt($attrs['password'])
+            ]);
 
-        // return user and token in response
-        return response([
-            'user' => $user,
-            'token' => $user->createToken('secret')->plainTextToken
-        ]);
+            // return user and token in response
+            return response()->json([
+                'user' => $user,
+                'token' => $user->createToken('secret')->plainTextToken
+            ]);
+
+        // }catch(\Throwable $throwable) {
+        //     return response()->json(["error"=>$throwable->getMessage()]);
+        // }
+
 
     }
 
@@ -38,15 +46,16 @@ class AuthController extends Controller
             'password' => 'required|min:6'
         ]);
 
+
         // attempt login
         if (!Auth::attempt($attrs)) {
-            return response([
+            return response()->json([
                 'message' => 'Invalid credentials.'
             ],403);
         }
 
         // return user and token in response
-        return response([
+        return response()->json([
             'user' => auth()->user(),
             'token'=> auth()->user()->createToken('secret')->plainTextToken
         ],200);

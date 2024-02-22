@@ -4,25 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Redis;
 
 class PostsController extends Controller
 {
     public function index()
     {
-        return response([
-            'posts' => Post::orderBy('created_at', 'desc')
+        try {
+            $posts = Post::orderBy('created_at', 'desc')
                 ->with('user:id,name,image')
                 ->withCount('comments', 'likes')
                 ->with('likes', function ($like) {
                     return $like->where('user_id', auth()->user()->id)->select('id', 'user_id', 'post_id')->get();
                 })
-                ->get(),
-        ], 200);
+                ->get();
+
+
+            return response()->json(['posts' => $posts]);
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
+        }
     }
 
     // get single post from
     public function show($id)
-    {
+    { 
         return response([
             'post' => Post::where('id', $id)->withCount('comments', 'likes')->get(),
         ], 200);
@@ -30,30 +37,28 @@ class PostsController extends Controller
 
     public function store(Request $request)
     {
-        // $validator = Validator::make(request()->all(), [
-        //     'invoiceId' => 'required|integer',
-        // ]);
+        try {
+            $attrs = $request->validate([
+                'body' => 'required|string',
+            ]);
 
-        // if ($validator->fails()) {
-        //     return $this->customFailResponseMessage($validator->messages(), 200);
-        // }
+            $image = $this->saveImage($request->image, 'posts');
 
-        $attrs = $request->validate([
-            'body' => 'required|string',
-        ]);
+            $post = Post::create([
+                'body' => $attrs['body'],
+                'user_id' => auth()->user()->id,
+                'image' => $image,
+            ]);
 
-        $image = $this->saveImage($request->image, 'posts');
+            $get_post = json_decode(Post::find($post->id));
 
-        $post = Post::create([
-            'body' => $attrs['body'],
-            'user_id' => auth()->user()->id,
-            'image' => $image,
-        ]);
-
-        return response([
-            'message' => 'Post created successfully.',
-            'post' => $post,
-        ], 200);
+            return response([
+                'message' => 'Post created successfully.',
+                'post' => $get_post,
+            ], 200);
+        } catch (\Throwable $throwable) {
+            return  response()->json($throwable->getMessage());
+        }
     }
 
     public function update(Request $request, $id)
