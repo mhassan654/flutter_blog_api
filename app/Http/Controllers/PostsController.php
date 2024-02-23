@@ -21,7 +21,10 @@ class PostsController extends Controller
                 ->get();
 
 
-            return response()->json(['posts' => $posts]);
+            return response()->json([
+                'data' => $posts,
+                "message"=>"success"
+            ]);
         } catch (\Throwable $throwable) {
             return $throwable->getMessage();
         }
@@ -40,12 +43,14 @@ class PostsController extends Controller
         try {
             $attrs = $request->validate([
                 'body' => 'required|string',
+                'title' => 'required|string',
             ]);
 
             $image = $this->saveImage($request->image, 'posts');
 
             $post = Post::create([
                 'body' => $attrs['body'],
+                'title' => $attrs['title'],
                 'user_id' => auth()->user()->id,
                 'image' => $image,
             ]);
@@ -79,9 +84,11 @@ class PostsController extends Controller
 
         $attrs = $request->validate([
             'body' => 'required|string',
+            'title' => 'required|string',
         ]);
 
         $post->body = $attrs['body'];
+        $post->title = $attrs['title'];
         $post->update();
 
         return response([
